@@ -1,0 +1,6 @@
+option(
+    'program_name',
+    type: 'string',
+    value: 'wombat-demo',
+    description: 'Name of the output executable (driven by PROGRAM_NAME in config.env).',
+)
