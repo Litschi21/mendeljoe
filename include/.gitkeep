@@ -1,2 +1,0 @@
-# Put your own project headers here — they are on the include path (see meson.build).
-# The Wombat API headers come from the installed -dev packages, not from this folder.

@@ -1,0 +1,31 @@
+BasedOnStyle: Chromium
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+ColumnLimit: 120
+
+AccessModifierOffset: -4
+NamespaceIndentation: All
+FixNamespaceComments: false
+
+InsertBraces: true
+
+AlignAfterOpenBracket: BlockIndent
+BinPackArguments: false
+BinPackParameters: false
+SeparateDefinitionBlocks: Always
+
+EnumTrailingComma: Insert
+
+AllowAllConstructorInitializersOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllArgumentsOnNextLine: false
+
+PenaltyReturnTypeOnItsOwnLine: 1000
+
+SpaceAfterCStyleCast: true
+SpacesBeforeTrailingComments: 1
+
+InsertNewlineAtEOF: true

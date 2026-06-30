@@ -1,4 +1,3 @@
-# Shared setup for all scripts. Source this; do not execute directly.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,10 +8,7 @@ if [ ! -f "${REPO_ROOT}/config.env" ]; then
     exit 1
 fi
 
-# Sourced as shell, so config.env supports inline comments and references to
-# earlier values (e.g. TARGET_DIR=/home/urc/${PROGRAM_NAME}/bin).
 set -a
-# shellcheck disable=SC1091
 source "${REPO_ROOT}/config.env"
 set +a
 

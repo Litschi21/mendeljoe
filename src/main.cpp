@@ -4,10 +4,9 @@
 // Reading sensors does NOT require acquire_control() — that is only needed when
 // you want to drive motors/servos (which take the hardware lock).
 //
-// Build & deploy:  scripts/full-cycle.sh   (build -> upload -> run)
+// Build & deploy:  scripts/deploy.sh   (build -> upload -> run)
 
-#include <urc/common/logger.hpp>  // urc::get_logger, LOG_* macros
-#include <urc/wombat.hpp>         // umbrella header for the whole Wombat API
+#include "wombat_demo.hpp"
 
 int main() {
     // get_logger() lazily starts the quill logging backend on first call.
@@ -20,9 +19,10 @@ int main() {
         urc::wombat::Connection connection;
         urc::wombat::Wombat wombat(connection, "wombat");
 
-        LOG_INFO(log, "Battery voltage: {:.2f} V", wombat.get_battery_voltage());
-        LOG_INFO(log, "Push button:     {}", wombat.get_push_button());
-        LOG_INFO(log, "IMU temperature: {:.1f} C", wombat.get_imu_temperature());
+        demo::log_status(wombat, log);
+
+        const float avg = demo::average_imu_temperature(wombat, 5);
+        LOG_INFO(log, "Average IMU temperature over 5 samples: {:.2f} C", avg);
 
         // Next steps — drive a motor (needs the hardware lock):
         //   connection.acquire_control();

@@ -1,5 +1,5 @@
 {
-  "name": "wombat-api-template",
+  "name": "wombat-api-template-debian",
   "build": {
     "dockerfile": "../cross/Dockerfile",
     "context": ".."
@@ -24,7 +24,6 @@
       }
     }
   },
-  "//": "SSH agent forwarding is automatic in dev containers; the mount below is a fallback for key-based auth to the Wombat.",
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/home/dev/.ssh,type=bind,readonly"
   ],
