@@ -1,0 +1,54 @@
+name: build-dev-image (debian trixie, cross toolchain)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - cross/**
+      - .forgejo/workflows/image.yaml
+  workflow_dispatch:
+  schedule:
+    # Weekly rebuild so the baked-in liburc-*-dev packages stay current.
+    - cron: '0 3 * * 1'
+
+env:
+  registry: git.robo4you.at
+  image: git.robo4you.at/unified-robot-control/wombat-api-template-debian
+
+jobs:
+  image:
+    runs-on: debian-13
+    steps:
+      - name: Tooling
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends nodejs buildah ca-certificates git
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Registry login
+        run: |
+          buildah login -u oauth2 -p "${{ secrets.PACKAGE_REGISTRY_TOKEN }}" "${registry}"
+
+      - name: Build image
+        run: |
+          # Read token via BuildKit secret so it never lands in an image layer.
+          printf '%s' "${{ secrets.PACKAGE_REGISTRY_READ_TOKEN }}" > /tmp/pkgtoken
+          buildah --storage-driver vfs bud \
+            --isolation chroot \
+            --secret id=pkgtoken,src=/tmp/pkgtoken \
+            -f cross/Dockerfile \
+            -t "${image}:latest" \
+            .
+          rm -f /tmp/pkgtoken
+
+      - name: Push
+        run: |
+          date_tag="$(date +%Y%m%d)"
+          buildah --storage-driver vfs tag "${image}:latest" "${image}:${date_tag}"
+          buildah --storage-driver vfs push "${image}:latest"
+          buildah --storage-driver vfs push "${image}:${date_tag}"

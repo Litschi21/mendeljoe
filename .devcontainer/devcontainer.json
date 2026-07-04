@@ -1,9 +1,6 @@
 {
   "name": "wombat-api-template-debian",
-  "build": {
-    "dockerfile": "../cross/Dockerfile",
-    "context": ".."
-  },
+  "image": "git.robo4you.at/unified-robot-control/wombat-api-template-debian:latest",
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "remoteUser": "dev",

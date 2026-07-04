@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.4
 FROM debian:trixie
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -23,7 +24,8 @@ RUN printf '#!/bin/sh\nexport PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgco
     && chmod +x /usr/local/bin/aarch64-linux-gnu-pkg-config
 
 COPY cross/apt-setup.sh /tmp/apt-setup.sh
-RUN chmod +x /tmp/apt-setup.sh && /tmp/apt-setup.sh && rm /tmp/apt-setup.sh
+RUN --mount=type=secret,id=pkgtoken \
+    chmod +x /tmp/apt-setup.sh && /tmp/apt-setup.sh && rm /tmp/apt-setup.sh
 
 ARG USERNAME=dev
 RUN useradd --create-home --shell /bin/bash "${USERNAME}"

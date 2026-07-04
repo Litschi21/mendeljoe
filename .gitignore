@@ -25,3 +25,7 @@ cmake-build-*/
 # OS cruft
 .DS_Store
 Thumbs.db
+
+# Nix (for testing purposes)
+flake.nix 
+flake.lock

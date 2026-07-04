@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+source "$(dirname "$0")/_helper.sh"
 
 if ! command -v clang-format >/dev/null; then
     echo "error: clang-format not found — run this inside the dev container." >&2
