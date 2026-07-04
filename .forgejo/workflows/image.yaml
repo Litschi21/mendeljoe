@@ -23,7 +23,8 @@ jobs:
       - name: Tooling
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends nodejs buildah ca-certificates git
+          apt-get install -y --no-install-recommends \
+            nodejs buildah netavark aardvark-dns ca-certificates git
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,6 +41,7 @@ jobs:
           printf '%s' "${{ secrets.PACKAGE_REGISTRY_READ_TOKEN }}" > /tmp/pkgtoken
           buildah --storage-driver vfs bud \
             --isolation chroot \
+            --network host \
             --secret id=pkgtoken,src=/tmp/pkgtoken \
             -f cross/Dockerfile \
             -t "${image}:latest" \
