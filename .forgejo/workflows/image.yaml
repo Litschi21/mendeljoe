@@ -9,8 +9,7 @@ on:
       - .forgejo/workflows/image.yaml
   workflow_dispatch:
   schedule:
-    # Weekly rebuild so the baked-in liburc-*-dev packages stay current.
-    - cron: '0 3 * * 1'
+    - cron: "0 3 * * 1"
 
 env:
   registry: git.robo4you.at
@@ -37,7 +36,6 @@ jobs:
 
       - name: Build image
         run: |
-          # Read token via BuildKit secret so it never lands in an image layer.
           printf '%s' "${{ secrets.PACKAGE_REGISTRY_READ_TOKEN }}" > /tmp/pkgtoken
           buildah --storage-driver vfs bud \
             --isolation chroot \
