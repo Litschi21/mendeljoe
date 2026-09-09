@@ -1,8 +1,8 @@
 // Minimal Wombat API tutorial.
 //
-// Connects to the Wombat daemon, prints a few read-only sensor values, then
-// briefly drives a motor and a servo. Reading sensors needs no lock; driving
-// actuators requires acquire() (the hardware lock).
+// Connects to the Wombat daemon, reports what it finds, waits for the push button, then
+// briefly drives a motor and a servo. Reading sensors needs no lock; driving actuators
+// requires acquire() (the hardware lock).
 //
 // Build & deploy:  scripts/deploy.sh   (build -> upload -> run)
 
@@ -26,11 +26,11 @@ int main() {
 
         demo::log_status(wombat, imu, log);
 
-        const float avg = demo::average_imu_temperature(imu, 5);
-        LOG_INFO(log, "Average IMU temperature over 5 samples: {:.2f} C", avg);
+        // Nothing above took the lock, so the check can happen with the robot on the table
+        // and someone else still holding control.
+        demo::wait_for_button(wombat, log);
 
-        // Driving motors/servos takes the hardware lock, held until
-        // release() (or the Connection is destroyed).
+        // Driving motors/servos takes the hardware lock.
         connection.acquire();
 
         // Motor speed is a urc::Scaling, normalised to [-1.0 .. 1.0].
@@ -45,7 +45,8 @@ int main() {
         urc::sleep(500ms);
         servo.disable();
 
-        connection.release();
+        // No release() needed: `connection` goes out of scope here and gives control up on
+        // its own. Call it explicitly only to hand control over earlier than that.
     } catch (const urc::wombat::WombatException& e) {
         LOG_ERROR(log, "Wombat error: {}", e.what());
         return 1;
