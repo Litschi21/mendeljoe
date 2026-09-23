@@ -4,13 +4,14 @@
 // briefly drives a motor and a servo. Reading sensors needs no lock; driving actuators
 // requires acquire() (the hardware lock).
 //
-// Build & deploy:  scripts/deploy.sh   (build -> upload -> run)
+// Build & deploy:  scripts/deploy.sh   (format -> build -> upload -> run)
 
 #include "wombat_demo.hpp"
 
 #include <urc/common/sleep.hpp>
 
-using namespace urc::literals; // _deg / _rad / _rot -> urc::Rotation, plus 500ms and friends
+using namespace urc::literals; // _deg / _rad / _rot -> urc::Rotation, _pct -> urc::Scaling,
+                               // plus 500ms and friends
 
 int main() {
     // get_logger() lazily starts the quill logging backend on first call.
@@ -33,15 +34,16 @@ int main() {
         // Driving motors/servos takes the hardware lock.
         connection.acquire();
 
-        // Motor speed is a urc::Scaling, normalised to [-1.0 .. 1.0].
+        // Motor speed is a urc::Scaling, normalised to [-1.0 .. 1.0]; _pct spells that out.
         urc::wombat::Motor motor(connection, "motor", urc::wombat::MotorPort::p0, 1.0);
-        motor.set_speed(0.5); // half speed forward
+        motor.set_speed(50_pct);
         urc::sleep(500ms);
         motor.off();
 
-        // Servo angle is a urc::Rotation — the urc::literals keep it readable.
+        // Servo angle is a urc::Rotation, the urc::literals keep it readable. It is measured
+        // about the centre, so 0_deg is centre and the range is -90_deg to +90_deg.
         urc::wombat::Servo servo(connection, "servo", urc::wombat::ServoPort::p0);
-        servo.set_position(90_deg);
+        servo.set_position(45_deg);
         urc::sleep(500ms);
         servo.disable();
 
