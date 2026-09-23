@@ -7,8 +7,10 @@ using namespace urc::literals; // 20ms and the other chrono durations
 namespace demo {
 
     void log_status(const urc::wombat::Wombat& wombat, const urc::wombat::Imu& imu, urc::logger_ptr log) {
-        // Both types print themselves, so they can go straight into the log statement.
-        LOG_INFO(log, "Battery: {:.2f} V, {} charged", wombat.get_battery_voltage(), wombat.get_battery_level());
+        // A urc::Scaling prints itself as an unrounded percentage (59.3091%), so the level goes
+        // through a double to come out whole. urc::Rotation prints itself fine as it is.
+        const auto level = static_cast<double>(wombat.get_battery_level()) * 100.0;
+        LOG_INFO(log, "Battery: {:.2f} V, {:.0f}% charged", wombat.get_battery_voltage(), level);
         LOG_INFO(log, "Heading: {}", imu.get_heading());
     }
 
