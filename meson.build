@@ -9,9 +9,10 @@ project(
 )
 
 wombat_api_dep = dependency('urc-wombat-api')
+program_name = get_option('program_name')
 
 executable(
-    meson.project_name(),
+    program_name,
     'src/main.cpp',
     'src/wombat_demo.cpp',
     include_directories: include_directories('include'),

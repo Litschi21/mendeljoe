@@ -1,0 +1,6 @@
+option(
+    'program_name',
+    type: 'string',
+    value: 'wombat-test',
+    description: 'Name of the output binary; the scripts pass PROGRAM_NAME from config.env',
+)
