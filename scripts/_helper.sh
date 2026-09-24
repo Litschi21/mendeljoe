@@ -24,7 +24,6 @@ if [ ! -f /.dockerenv ] && [ -z "${WOMBAT_IN_CONTAINER:-}" ]; then
   exec docker run --rm "${docker_tty[@]}" \
     -e WOMBAT_IN_CONTAINER=1 \
     -v "${REPO_ROOT}:/workspace" -w /workspace \
-    -v "${HOME}/.ssh:/home/dev/.ssh:ro" \
     "${IMAGE}" bash "scripts/$(basename "${0}")" "$@"
 fi
 
@@ -41,3 +40,25 @@ esac
 
 BUILD_DIR="${REPO_ROOT}/build-${ARCH}"
 BIN_PATH="${BUILD_DIR}/${PROGRAM_NAME}"
+
+DEPLOY_DIR="${REPO_ROOT}/.ssh-deploy"
+DEPLOY_KEY="${DEPLOY_DIR}/id_ed25519"
+
+prepare_ssh() {
+  if [ ! -f "${DEPLOY_KEY}" ]; then
+    echo "error: no deploy key at .ssh-deploy/id_ed25519" >&2
+    echo "generate one, then put .ssh-deploy/id_ed25519.pub into ~/.ssh/authorized_keys on the Wombat:" >&2
+    echo "  ssh-keygen -t ed25519 -N \"\" -f .ssh-deploy/id_ed25519" >&2
+    exit 1
+  fi
+
+  staged_key="${HOME}/.ssh/wombat-deploy"
+  mkdir -p "${HOME}/.ssh"
+  chmod 700 "${HOME}/.ssh"
+  cp "${DEPLOY_KEY}" "${staged_key}"
+  chmod 600 "${staged_key}"
+
+  SSH_BASE_OPTS="-i ${staged_key} -o IdentitiesOnly=yes"
+  SSH_BASE_OPTS="${SSH_BASE_OPTS} -o UserKnownHostsFile=${DEPLOY_DIR}/known_hosts"
+  SSH_BASE_OPTS="${SSH_BASE_OPTS} -o StrictHostKeyChecking=accept-new"
+}

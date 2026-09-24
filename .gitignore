@@ -1,3 +1,7 @@
+# Deploy key for this project's Wombat
+/.ssh-deploy/*
+!/.ssh-deploy/.gitkeep
+
 # Build output
 build-*/
 compile_commands.json

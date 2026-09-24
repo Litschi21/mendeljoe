@@ -13,6 +13,8 @@ if [ ! -x "${BIN_PATH}" ]; then
   exit 1
 fi
 
-ssh ${SSH_OPTS:-} "${TARGET_HOST}" "mkdir -p '${TARGET_DIR}'"
-scp ${SSH_OPTS:-} "${BIN_PATH}" "${TARGET_HOST}:${TARGET_DIR}/"
+prepare_ssh
+
+ssh ${SSH_BASE_OPTS} "${TARGET_HOST}" "mkdir -p '${TARGET_DIR}'"
+scp ${SSH_BASE_OPTS} "${BIN_PATH}" "${TARGET_HOST}:${TARGET_DIR}/"
 echo "Uploaded ${PROGRAM_NAME} to ${TARGET_HOST}:${TARGET_DIR}/"

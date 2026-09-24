@@ -1,0 +1,10 @@
+Put this project's deploy key here, as id_ed25519 (and id_ed25519.pub):
+
+    ssh-keygen -t ed25519 -N "" -f .ssh-deploy/id_ed25519
+
+The public half goes into ~/.ssh/authorized_keys on the Wombat, the Raspberry Pi
+Imager can paste it in for you while flashing the card. The scripts pick the key up
+from here and keep their known_hosts beside it, so the container never needs your
+own ~/.ssh.
+
+Everything in this folder is gitignored except this file. Do not commit the key.

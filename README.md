@@ -32,7 +32,7 @@ docker login git.robo4you.at
 ```
 
 Username is your Forgejo name; password is a **`read:package`** token from
-Forgejo → *Settings → Applications*. After that, `docker pull`, the scripts, and
+Forgejo → _Settings → Applications_. After that, `docker pull`, the scripts, and
 VS Code "Reopen in Container" all work. The token is only stored by `docker
 login` (`~/.docker/config.json`) — never put it in `config.env`.
 
@@ -64,13 +64,32 @@ login` (`~/.docker/config.json`) — never put it in `config.env`.
 
 ## Configuration (`config.env`)
 
-| Variable       | Meaning                                                |
-| -------------- | ------------------------------------------------------ |
-| `ARCH`         | `arm64` (Wombat) or `amd64` (local testing)            |
-| `PROGRAM_NAME` | Output binary name                                     |
-| `TARGET_HOST`  | `user@host` of the Wombat for upload/run               |
-| `TARGET_DIR`   | Remote directory to copy the binary into and run from  |
-| `SSH_OPTS`     | Extra ssh/scp options, e.g. `-i $HOME/.ssh/key`        |
+| Variable       | Meaning                                                  |
+| -------------- | -------------------------------------------------------- |
+| `ARCH`         | `arm64` (Wombat) or `amd64` (local testing)              |
+| `PROGRAM_NAME` | Output binary name                                       |
+| `TARGET_HOST`  | `user@host` of the Wombat for upload/run                 |
+| `TARGET_DIR`   | Remote directory to copy the binary into and run from    |
+
+## The deploy key (`.ssh-deploy/`)
+
+The scripts reach the Wombat with a key that belongs to this project, not with your own
+`~/.ssh`. Generate it once:
+
+```sh
+ssh-keygen -t ed25519 -N "" -f .ssh-deploy/id_ed25519
+```
+
+and put `.ssh-deploy/id_ed25519.pub` into `~/.ssh/authorized_keys` on the Wombat - the
+Raspberry Pi Imager can paste it in while flashing the card. `known_hosts` is kept in the
+same folder, so the board is remembered between runs.
+
+Everything in there is gitignored. The container never sees your own `~/.ssh`, which is
+also why nothing in your `~/.ssh/config` can interfere with a deploy.
+
+If you need a non-standard port or a jump host, add the option to the `ssh`/`scp` lines in
+`scripts/upload.sh` and `scripts/run.sh`. Use the `-o Port=2222` form rather than `-p`:
+`ssh` and `scp` disagree on the short flag.
 
 ## Layout
 
@@ -78,6 +97,7 @@ login` (`~/.docker/config.json`) — never put it in `config.env`.
 wombat-api-template-debian/
 ├── config.env
 ├── meson.build
+├── .ssh-deploy/
 ├── src/
 │   ├── main.cpp
 │   └── wombat_demo.cpp
