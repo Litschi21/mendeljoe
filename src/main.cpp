@@ -84,14 +84,11 @@ void Bot::setRightMotor(float speed) { rightMotor.set_speed(speed); }
 int main() {
   Bot bot{};
 
-  bot.setMotors(0.5F);
-  urc::sleep(1000ms);
+  bot.setMotors(1.0F);
+  urc::sleep(500ms);
 
-  bot.turnDeg(720, 0.5F);
-  urc::sleep(1000ms);
-
-  bot.turnDeg(180, 0.5F);
-  urc::sleep(1000ms);
+  bot.turnDeg(180_deg);
+  bot.turnDeg(180_deg, 1.0F, Direction::Left);
 
   bot.stop();
   return 0;
