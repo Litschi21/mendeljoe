@@ -34,11 +34,11 @@ public:
   void turnDeg(int degrees, float speed = 1.0F);
   void moveServo(int servoNum, urc::Rotation degrees);
 
-  void setBoth(float speed);
+  void setMotors(float speed);
   void stop();
 
-  void setLeft(float speed);
-  void setRight(float speed);
+  void setLeftMotor(float speed);
+  void setRightMotor(float speed);
 };
 
 #endif // MAIN_H

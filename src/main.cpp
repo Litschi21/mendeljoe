@@ -48,14 +48,14 @@ void Bot::turnDeg(int degrees, float speed) {
     prev = curr;
 
     if (degrees - turned <= 20.0) {
-      setLeft(0.05F);
-      setRight(-0.05F);
+      setLeftMotor(0.05F);
+      setRightMotor(-0.05F);
     }
 
     urc::sleep(1ms);
   }
 
-  setBoth(speed);
+  setMotors(speed);
 }
 
 void Bot::moveServo(int servoNum, urc::Rotation degrees) {
@@ -70,23 +70,23 @@ void Bot::moveServo(int servoNum, urc::Rotation degrees) {
   urc::sleep(servo90Time);
 }
 
-void Bot::setBoth(float speed) {
-  setLeft(speed);
-  setRight(speed);
+void Bot::setMotors(float speed) {
+  setLeftMotor(speed);
+  setRightMotor(speed);
 }
 
 void Bot::stop() {
-  setLeft(0.0F);
-  setRight(0.0F);
+  setLeftMotor(0.0F);
+  setRightMotor(0.0F);
 }
 
-void Bot::setLeft(float speed) { left.set_speed(speed); }
-void Bot::setRight(float speed) { right.set_speed(speed); }
+void Bot::setLeftMotor(float speed) { left.set_speed(speed); }
+void Bot::setRightMotor(float speed) { right.set_speed(speed); }
 
 int main() {
   Bot bot{};
 
-  bot.setBoth(0.5F);
+  bot.setMotors(0.5F);
   urc::sleep(1000ms);
 
   bot.turnDeg(720, 0.5F);
