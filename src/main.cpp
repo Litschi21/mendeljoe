@@ -12,14 +12,14 @@ using namespace urc::literals; // _deg / _rad / _rot -> urc::Rotation, _pct -> u
 
 Bot::Bot()
     : board(create_conn, "create"), imu(wombat_conn, "imu"), left{board.left_wheel()},
-      right{board.right_wheel()}, servo1(wombat_conn, "servo1", urc::wombat::ServoPort::p0),
-      servo2(wombat_conn, "servo2", urc::wombat::ServoPort::p1), log(urc::get_logger("LOG")) {
+      right{board.right_wheel()}, armServo(wombat_conn, "armServo", urc::wombat::ServoPort::p0),
+      clawServo(wombat_conn, "clawServo", urc::wombat::ServoPort::p1), log(urc::get_logger("LOG")) {
   acquireConns();
 }
 
 Bot::~Bot() {
-  servo1.disable();
-  servo2.disable();
+  armServo.disable();
+  clawServo.disable();
 
   wombat_conn.release();
   create_conn.release();
@@ -58,15 +58,11 @@ void Bot::turnDeg(int degrees, float speed) {
   setMotors(speed);
 }
 
-void Bot::moveServo(int servoNum, urc::Rotation degrees) {
-  if (servoNum == 1) {
-    servo1.set_position(degrees);
-  }
+urc::wombat::Servo Bot::getArmServo() { return armServo; }
+urc::wombat::Servo Bot::getClawServo() { return clawServo; }
 
-  if (servoNum == 2) {
-    servo2.set_position(degrees);
-  }
-
+void Bot::moveServo(urc::wombat::Servo servo, urc::Rotation degrees) {
+  servo.set_position(degrees);
   urc::sleep(servo90Time);
 }
 

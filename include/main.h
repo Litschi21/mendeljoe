@@ -21,8 +21,8 @@ class Bot {
   urc::create::Motor left;
   urc::create::Motor right;
 
-  urc::wombat::Servo servo1;
-  urc::wombat::Servo servo2;
+  urc::wombat::Servo armServo;
+  urc::wombat::Servo clawServo;
 
 public:
   urc::logger_ptr log;
@@ -32,7 +32,10 @@ public:
 
   void acquireConns();
   void turnDeg(int degrees, float speed = 1.0F);
-  void moveServo(int servoNum, urc::Rotation degrees);
+  void moveServo(urc::wombat::Servo servo, urc::Rotation degrees);
+
+  urc::wombat::Servo getArmServo();
+  urc::wombat::Servo getClawServo();
 
   void setMotors(float speed);
   void stop();
