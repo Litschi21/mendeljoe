@@ -10,6 +10,11 @@
 
 using namespace urc::literals;
 
+enum class Direction {
+  Left,
+  Right
+};
+
 class Bot {
   static constexpr auto servo90Time = 500ms;
   urc::wombat::Connection wombat_conn;
@@ -18,8 +23,8 @@ class Bot {
   urc::create::Create board;
   urc::wombat::Imu imu;
 
-  urc::create::Motor left;
-  urc::create::Motor right;
+  urc::create::Motor leftMotor;
+  urc::create::Motor rightMotor;
 
   urc::wombat::Servo armServo;
   urc::wombat::Servo clawServo;
@@ -31,7 +36,7 @@ public:
   ~Bot();
 
   void acquireConns();
-  void turnDeg(int degrees, float speed = 1.0F);
+  void turnDeg(int degrees, float speed = 1.0F, Direction d = Direction::Right);
   void moveServo(urc::wombat::Servo servo, urc::Rotation degrees);
 
   urc::wombat::Servo getArmServo();

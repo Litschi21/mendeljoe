@@ -11,8 +11,9 @@ using namespace urc::literals; // _deg / _rad / _rot -> urc::Rotation, _pct -> u
                                // plus 500ms and friends
 
 Bot::Bot()
-    : board(create_conn, "create"), imu(wombat_conn, "imu"), left{board.left_wheel()},
-      right{board.right_wheel()}, armServo(wombat_conn, "armServo", urc::wombat::ServoPort::p0),
+    : board(create_conn, "create"), imu(wombat_conn, "imu"), leftMotor{board.left_wheel()},
+      rightMotor{board.right_wheel()},
+      armServo(wombat_conn, "armServo", urc::wombat::ServoPort::p0),
       clawServo(wombat_conn, "clawServo", urc::wombat::ServoPort::p1), log(urc::get_logger("LOG")) {
   acquireConns();
 }
@@ -30,26 +31,27 @@ void Bot::acquireConns() {
   create_conn.acquire();
 }
 
-void Bot::turnDeg(int degrees, float speed) {
+void Bot::turnDeg(int degrees, float speed, Direction d) {
   LOG_INFO(log, "Turning {} deg at {}% speed", degrees, speed * 100);
-  if (degrees == 0.0F) {
+  if (degrees == 0) {
     return;
   }
 
   float turned{};
+  bool left = d == Direction::Left;
   auto prev = imu.get_heading().degrees();
 
-  left.set_speed(speed);
-  right.set_speed(-speed);
+  leftMotor.set_speed(left ? -speed : speed);
+  rightMotor.set_speed(left ? speed : -speed);
 
-  while (turned < degrees) {
+  while (left ? (turned > degrees) : (turned < degrees)) {
     auto curr = imu.get_heading().degrees();
     turned += std::remainder(curr - prev, 360.0F);
     prev = curr;
 
-    if (degrees - turned <= 20.0) {
-      setLeftMotor(0.05F);
-      setRightMotor(-0.05F);
+    if (degrees - std::abs(turned) <= 20.0) {
+      setLeftMotor(left ? -0.05F : 0.05F);
+      setRightMotor(left ? 0.05F : -0.05F);
     }
 
     urc::sleep(1ms);
@@ -76,8 +78,8 @@ void Bot::stop() {
   setRightMotor(0.0F);
 }
 
-void Bot::setLeftMotor(float speed) { left.set_speed(speed); }
-void Bot::setRightMotor(float speed) { right.set_speed(speed); }
+void Bot::setLeftMotor(float speed) { leftMotor.set_speed(speed); }
+void Bot::setRightMotor(float speed) { rightMotor.set_speed(speed); }
 
 int main() {
   Bot bot{};
