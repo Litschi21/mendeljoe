@@ -9,6 +9,7 @@ project(
 )
 
 wombat_api_dep = dependency('urc-wombat-api')
+create_api_dep = dependency('urc-create-api')
 program_name = get_option('program_name')
 
 executable(
@@ -16,6 +17,6 @@ executable(
     'src/main.cpp',
     'src/wombat_demo.cpp',
     include_directories: include_directories('include'),
-    dependencies: [wombat_api_dep],
+    dependencies: [wombat_api_dep, create_api_dep],
     install: false,
 )

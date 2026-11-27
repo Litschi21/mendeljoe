@@ -1,58 +1,100 @@
-// Minimal Wombat API tutorial.
-//
-// Connects to the Wombat daemon, reports what it finds, waits for the push button, then
-// briefly drives a motor and a servo. Reading sensors needs no lock; driving actuators
-// requires acquire() (the hardware lock).
-//
-// Build & deploy:  scripts/deploy.sh   (format -> build -> upload -> run)
+#include "main.h"
 
-#include "wombat_demo.hpp"
-
+#include <cmath>
 #include <urc/common/sleep.hpp>
+#include <urc/create.hpp>
+#include <urc/wombat/Imu.hpp>
+#include <urc/wombat/Servo.hpp>
+#include <urc/wombat/Wombat.hpp>
 
 using namespace urc::literals; // _deg / _rad / _rot -> urc::Rotation, _pct -> urc::Scaling,
                                // plus 500ms and friends
 
-int main() {
-    // get_logger() lazily starts the quill logging backend on first call.
-    auto* log = urc::get_logger("tutorial");
+Bot::Bot()
+    : board(create_conn, "create"), imu(wombat_conn, "imu"), left{board.left_wheel()},
+      right{board.right_wheel()}, servo1(wombat_conn, "servo1", urc::wombat::ServoPort::p0),
+      servo2(wombat_conn, "servo2", urc::wombat::ServoPort::p1), log(urc::get_logger("LOG")) {
+  acquireConns();
+}
 
-    try {
-        // Connects to Connection::SYSTEMD_SOCKET_PATH (/run/wombat/api.sock) and
-        // performs the GetInfo handshake. Pass Connection::TEMP_SOCKET_PATH as the
-        // socket argument to talk to a development socket instead.
-        urc::wombat::Connection connection;
-        urc::wombat::Wombat wombat(connection, "wombat");
-        urc::wombat::Imu imu(connection, "imu");
+Bot::~Bot() {
+  servo1.disable();
+  servo2.disable();
 
-        demo::log_status(wombat, imu, log);
+  wombat_conn.release();
+  create_conn.release();
+}
 
-        // Nothing above took the lock, so the check can happen with the robot on the table
-        // and someone else still holding control.
-        demo::wait_for_button(wombat, log);
+void Bot::acquireConns() {
+  wombat_conn.acquire();
+  create_conn.acquire();
+}
 
-        // Driving motors/servos takes the hardware lock.
-        connection.acquire();
+void Bot::turnDeg(int degrees, float speed) {
+  LOG_INFO(log, "Turning {} deg at {}% speed", degrees, speed * 100);
+  if (degrees == 0.0F) {
+    return;
+  }
 
-        // Motor speed is a urc::Scaling, normalised to [-1.0 .. 1.0]; _pct spells that out.
-        urc::wombat::Motor motor(connection, "motor", urc::wombat::MotorPort::p0, 1.0);
-        motor.set_speed(50_pct);
-        urc::sleep(500ms);
-        motor.off();
+  float turned{};
+  auto prev = imu.get_heading().degrees();
 
-        // Servo angle is a urc::Rotation, the urc::literals keep it readable. It is measured
-        // about the centre, so 0_deg is centre and the range is -90_deg to +90_deg.
-        urc::wombat::Servo servo(connection, "servo", urc::wombat::ServoPort::p0);
-        servo.set_position(45_deg);
-        urc::sleep(500ms);
-        servo.disable();
+  left.set_speed(speed);
+  right.set_speed(-speed);
 
-        // No release() needed: `connection` goes out of scope here and gives control up on
-        // its own. Call it explicitly only to hand control over earlier than that.
-    } catch (const urc::wombat::WombatException& e) {
-        LOG_ERROR(log, "Wombat error: {}", e.what());
-        return 1;
+  while (turned < degrees) {
+    auto curr = imu.get_heading().degrees();
+    turned += std::remainder(curr - prev, 360.0F);
+    prev = curr;
+
+    if (degrees - turned <= 20.0) {
+      setLeft(0.05F);
+      setRight(-0.05F);
     }
 
-    return 0;
+    urc::sleep(1ms);
+  }
+
+  setBoth(speed);
+}
+
+void Bot::moveServo(int servoNum, urc::Rotation degrees) {
+  if (servoNum == 1) {
+    servo1.set_position(degrees);
+  }
+
+  if (servoNum == 2) {
+    servo2.set_position(degrees);
+  }
+
+  urc::sleep(servo90Time);
+}
+
+void Bot::setBoth(float speed) {
+  setLeft(speed);
+  setRight(speed);
+}
+
+void Bot::stop() {
+  setLeft(0.0F);
+  setRight(0.0F);
+}
+
+void Bot::setLeft(float speed) { left.set_speed(speed); }
+void Bot::setRight(float speed) { right.set_speed(speed); }
+
+int main() {
+  Bot bot{};
+
+  bot.setBoth(0.5F);
+  urc::sleep(1000ms);
+
+  bot.turnDeg(720, 0.5F);
+  urc::sleep(1000ms);
+
+  bot.turnDeg(180, 0.5F);
+  urc::sleep(1000ms);
+
+  bot.stop();
+  return 0;
 }

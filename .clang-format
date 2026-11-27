@@ -1,31 +1,22 @@
-BasedOnStyle: Chromium
+BasedOnStyle: LLVM
 
-IndentWidth: 4
-TabWidth: 4
+IndentWidth: 2
+TabWidth: 2
 UseTab: Never
 
-ColumnLimit: 120
-
-AccessModifierOffset: -4
-NamespaceIndentation: All
-FixNamespaceComments: false
-
+ColumnLimit: 100
 InsertBraces: true
-
 AlignAfterOpenBracket: BlockIndent
-BinPackArguments: false
-BinPackParameters: false
-SeparateDefinitionBlocks: Always
-
-EnumTrailingComma: Insert
+PointerAlignment: Right
 
 AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowAllArgumentsOnNextLine: false
 
 PenaltyReturnTypeOnItsOwnLine: 1000
-
-SpaceAfterCStyleCast: true
 SpacesBeforeTrailingComments: 1
 
-InsertNewlineAtEOF: true
+IncludeBlocks: Regroup
+SortIncludes: true
+
+InsertNewlineAtEOF: false
